@@ -1,7 +1,9 @@
 import os
 import re
+import time
 import base64
 import logging
+import platform
 
 from aexpect import ShellError
 
@@ -262,6 +264,10 @@ def run(test, params, env):
             else:
                 try:
                     session = vm.wait_for_login()
+                    # Here the script needs wait for a while for the guest to
+                    # recognize the hotplugged disk on PPC
+                    if platform.platform().count('ppc64'):
+                        time.sleep(10)
                     cmd = "grep %s /proc/partitions" % disk_target
                     s, o = session.cmd_status_output(cmd)
                     logging.info("%s output: %s", cmd, o)
