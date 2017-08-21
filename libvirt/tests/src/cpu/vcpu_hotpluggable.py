@@ -4,6 +4,7 @@ import copy
 import ast
 import logging
 import time
+import subprocess
 
 from avocado.utils import process
 
@@ -105,9 +106,18 @@ def run(test, params, env):
             # Wait for domain is stable
             time.sleep(20)
 
+            # Check cpu in guest
+            if not utils_misc.check_if_vm_vcpu_match(vcpus_current, vm):
+                test.fail("cpu number in VM is not correct, it should be %s cpus" % vcpus_current)
+
             if set_live_vcpus:
                 ret = virsh.setvcpus(vm_name, set_live_vcpus, ignore_status=True,
                                      debug=True)
+                if ret.exit_status != 0:
+                    # Due to unknown reason, hotunplug operation is always timeouts by using avocado.
+                    # So, there is a spare method.
+                    subprocess.check_output(["virsh", "setvcpus", vm_name, str(set_live_vcpus)])
+
                 vcpus_current = int(set_live_vcpus)
             if set_config_vcpus:
                 ret = virsh.setvcpus(vm_name, set_config_vcpus, "--config",
