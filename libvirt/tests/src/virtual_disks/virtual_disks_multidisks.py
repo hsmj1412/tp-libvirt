@@ -821,6 +821,7 @@ def run(test, params, env):
 
         # Start the VM.
         vm.start()
+        vm.wait_for_login()
         if status_error:
             test.fail("VM started unexpectedly")
 

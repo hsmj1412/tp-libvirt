@@ -179,6 +179,7 @@ def run(test, params, env):
         if start_vm:
             if vm.is_dead():
                 vm.start()
+            vm.wait_for_login()
         else:
             if not vm.is_dead():
                 vm.destroy()
